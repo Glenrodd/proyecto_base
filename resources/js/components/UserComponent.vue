@@ -22,15 +22,15 @@
                     </template>
                     <template slot="option" slot-scope="props">
                         <a href="#" data-toggle="modal" data-target="#UserModal" @click="edit(props.row)" ><i class="fas fa-pen-square text-primary"></i></a>
-                        <a href="#" v-if="!props.row.deleted_at"> <i class="fas fa-user-slash text-success " @click="deleteItem(props.row)">check_box</i></a>
-                        <a href="#" v-if="props.row.deleted_at"> <i class="fas fa-user text-danger "  @click='enabledItem(props.row)'>check_box_outline_blank</i></a>
+                        <a href="#" v-if="!props.row.deleted_at"> <i class="fas fa-user-slash text-success " @click="deleteItem(props.row)"></i></a>
+                        <a href="#" v-if="props.row.deleted_at"> <i class="fas fa-user text-danger "  @click='enabledItem(props.row)'></i></a>
                     </template>
                 </vue-bootstrap4-table>
             </div>
         </div>
         <div class="modal fade" id="UserModal" tabindex="-1" role="dialog" aria-labelledby="ArticleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
-                <form id='formArticle' method="post" :action="url">
+                <form id='formArticle' role="form">
 
                     <div class="modal-content">
                         <div v-html='csrf'></div>
@@ -48,6 +48,7 @@
                                     <label for="lbname">Nombre</label>
                                     <input type="text" class="form-control" id="name" name="name" v-model="form.name" placeholder="Nombre">
                                     <!--<div class="invalid-feedback">{{ errors.first("name") }}</div>-->
+                                    <span v-if="errors.name" class="text-danger">{{ errors.name[0] }}</span>
                                 </div>
 							</div>
                             <div class="row">
@@ -55,6 +56,7 @@
                                     <label for="lbname">Email</label>
                                     <input type="email" class="form-control" id="email" name="email" v-model="form.email" placeholder="Email">
                                     <!--<div class="invalid-feedback">{{ errors.first("name") }}</div>-->
+                                    <span v-if="errors.email" class="text-danger">{{ errors.email[0] }}</span>
                                 </div>
 							</div>
                             <div class="row">
@@ -62,12 +64,13 @@
                                     <label for="lbname">Password</label>
                                     <input type="password" class="form-control" id="password" name="password" v-model="form.password" placeholder="Password">
                                     <!--<div class="invalid-feedback">{{ errors.first("name") }}</div>-->
+                                    <span v-if="errors.password" class="text-danger">{{ errors.password[0] }}</span>
                                 </div>
 							</div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal" >Cancelar</button>
-                            <button type="submit" class="btn btn-success">Guardar</button>
+                            <button type="submit" class="btn btn-success" @click.prevent='save()'>Guardar</button>
                         </div>
                     </div>
                 </form>
@@ -79,6 +82,8 @@
 
 <script>
 import VueBootstrap4Table from 'vue-bootstrap4-table';
+import { ValidationProvider, extend } from 'vee-validate';
+import { required } from 'vee-validate/dist/rules';
     export default {
         props:['url','csrf'],
         
@@ -150,11 +155,8 @@ import VueBootstrap4Table from 'vue-bootstrap4-table';
             },
             users:[],
             form:{},
-            budget_items:[],
-            units: [],
-            categories: [],
-            providers: [],
             title:'',
+            errors: []
         }),
         mounted() {
             console.log('Component mounted.')
@@ -198,6 +200,22 @@ import VueBootstrap4Table from 'vue-bootstrap4-table';
             create(){
                 this.form = {};
             },
+            save(){
+                console.log("GUARDANDO");
+                axios.post(`users`,this.form)
+                .then(response=>{
+                    console.log(response);
+                    $('#UserModal').modal('hide');
+                    location.reload();
+                })
+                .catch((error)=>{
+                    
+                    if(error.response.status == 422){
+                        console.log(error.response.data.errors);
+                        this.errors = error.response.data.errors
+                    }
+                });
+            },
             edit(user){
                 console.log(user);
                 axios.get(`users/${user.id}`).then(response=>{
@@ -216,9 +234,75 @@ import VueBootstrap4Table from 'vue-bootstrap4-table';
                     toastr.error('Debe completar la informacion correctamente')
                 });
             },
+            deleteItem(data){
+                Swal.fire({
+                title: 'Esta Seguro de Inactivar al usuario '+data.name+'?',
+                text: "una vez inactivo el usuario n o podra ingresar al sistema!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si',
+                cancelButtonText: 'No'
+                }).then((result) => {
+                if (result.value) {
+
+                    axios.delete(`users/${data.id}`)
+                        .then(response=>{
+                            console.log(response);
+                            location.reload();
+                        })
+                        .catch(error=>{
+                            // handle error
+                            Swal.fire(
+                            'Error! contactese con soporte tecnico',
+                            ''+error,
+                            'error'
+                            )
+                            // console.log(error);
+                        });
+                }
+                })
+
+            },
+            enabledItem(data){
+
+            Swal.fire({
+                title: 'Esta Seguro de Activar al usuario'+data.name+'?',
+                text: "una vez activo el usuario podrá ingresar al sistema",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si',
+                cancelButtonText: 'No'
+                }).then((result) => {
+                if (result.value) {
+
+                    axios.get(`users/${data.id}/edit`)
+                        .then(response=>{
+                            console.log(response);
+                            location.reload();
+                        })
+                        .catch(error=>{
+                            // handle error
+                            Swal.fire(
+                            'Error! contactese con soporte tecnico',
+                            ''+error,
+                            'error'
+                            )
+                            // console.log(error);
+                        });
+
+
+                }
+            })
+
+        }
         },
         components: {
-            VueBootstrap4Table
-        }
+            VueBootstrap4Table,
+            ValidationProvider
+        },
     }
 </script>

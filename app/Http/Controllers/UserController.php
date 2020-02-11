@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use Hash;
+use App\Http\Requests\UserRequest;
 
 class UserController extends Controller
 {
@@ -36,30 +37,52 @@ class UserController extends Controller
         {
             array_push($conditions,array('email','like',"%{$email}%"));
         }
-        $users = User::where($conditions)
+        $users = User::where($conditions)->withTrashed()
                     ->orderBy('name')
                     ->paginate($pagination_rows);
         return response()->json($users->toArray());
     }
 
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
         if($request->has("id")){
             $user = User::find($request->id);
         }else{
             $user = new User;
+            $request->validate([
+                'email' => 'required|unique:users',
+            ]);
         }        
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
         $user->save();
-        session()->flash('message','Se registro el Articulo '.$user->name);
-        return back()->withInput();
+        session()->flash('message','Se registro el usuario '.$user->name);
+        //return back()->withInput();
+        return;
     }
 
     public function show($id)
     {
         $user = User::find($id);
         return response()->json(compact('user'));
+    }
+
+    public function destroy($id)
+    {
+        $user = User::find($id);
+        $name = $user->name;
+        $user->delete();
+        session()->flash('delete','se Inactivo al usuario '.$name);
+        return $id;
+    }
+
+    public function edit($id)
+    {
+        $user = User::withTrashed()->find($id);
+        $user->deleted_at = null;
+        $user->save();
+        session()->flash('message','se Activo al usuario '.$user->name);
+        return $id;
     }
 }

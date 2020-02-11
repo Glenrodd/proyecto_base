@@ -8,7 +8,7 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
-
+window.Swal = require('sweetalert2');
 window.toastr = require('toastr');
 toastr.options = {
     "closeButton": false,

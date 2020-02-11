@@ -163,5 +163,37 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <!-- ./wrapper -->
   <!-- REQUIRED SCRIPTS -->
   <script src="{{ asset('js/app.js') }}"></script>
+
+  <script>
+        window.onload = function () {
+          console.log("ABRIEMNDO EL TOASTR");
+            var message =@json(session('message'));
+            var deleteMessage = @json(session('delete'));
+            var error = @json(session('error'));
+            var info = @json(session('info'));
+            if(message){
+                toastr.success(message,'Registro Exitoso');
+            }
+            if(deleteMessage){
+                toastr.warning(deleteMessage,'Registro Eliminado');
+            }
+            if(error){
+                toastr.error( error,'Error');
+            }
+            if(info){
+                toastr.info(info, 'Alerta' );
+            }
+            $('#perfil').click(function(){
+                console.log('perfil click');
+            });
+            $('#config').click(function(){
+                console.log('config click');
+            });
+            $('#logout').click(function(){
+                console.log('logout click');
+            });
+            @yield('script')
+        };
+    </script>
 </body>
 </html>
