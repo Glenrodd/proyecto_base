@@ -24,4 +24,5 @@ Route::group(['middleware' => ['auth']], function () {
 	Route::get('gleney',function(){
 		return "HOLA GLENEY";
 	});
+	Route::resource('users','UserController');
 });

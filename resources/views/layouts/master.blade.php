@@ -10,6 +10,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <meta http-equiv="x-ua-compatible" content="ie=edge">
 
   <title>Proyecto</title>
+
   <!-- CSRF Token -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -102,7 +103,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="/users" class="nav-link">
+                <a href="users" class="nav-link">
                   <i class="fas fa-users nav-icon"></i>
                   <p>Usuarios</p>
                 </a>
@@ -132,7 +133,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Main content -->
     <div class="content">
       <div class="container-fluid">
-        
+      @yield('content')
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content -->
@@ -156,13 +157,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
       Anything you want
     </div>
     <!-- Default to the left -->
-    <strong>Copyright &copy; 2014-2019 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+    <strong>Copyright &copy; 2020 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
   </footer>
 </div>
 <!-- ./wrapper -->
-
-<!-- REQUIRED SCRIPTS -->
-
-<script src="{{ asset('js/app.js') }}"></script>
+  <!-- REQUIRED SCRIPTS -->
+  <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>
